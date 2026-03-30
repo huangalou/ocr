@@ -4,7 +4,6 @@ import time
 import uuid
 
 import cv2
-import numpy as np
 from boto3 import client as boto3_client
 
 from .queue_client import push_frame

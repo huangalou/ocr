@@ -1,29 +1,42 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { listPlates, listCameras } from "../api/client";
 import type { PlateRecord, Camera } from "../api/client";
 import { usePlateWebSocket } from "../hooks/useWebSocket";
 
+type RecordAction =
+  | { type: "init"; records: PlateRecord[]; total: number }
+  | { type: "new_plate"; plate: PlateRecord };
+
+function recordReducer(state: { records: PlateRecord[]; todayCount: number }, action: RecordAction) {
+  switch (action.type) {
+    case "init":
+      return { records: action.records, todayCount: action.total };
+    case "new_plate":
+      return {
+        records: [action.plate, ...state.records].slice(0, 10),
+        todayCount: state.todayCount + 1,
+      };
+  }
+}
+
 export default function Dashboard() {
-  const [records, setRecords] = useState<PlateRecord[]>([]);
+  const [{ records, todayCount }, dispatch] = useReducer(recordReducer, { records: [], todayCount: 0 });
   const [cameras, setCameras] = useState<Camera[]>([]);
-  const [todayCount, setTodayCount] = useState(0);
   const latestPlate = usePlateWebSocket();
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     listPlates({ start_date: today, page_size: 10, sort_by: "recognized_at", sort_order: "desc" }).then((res) => {
-      setRecords(res.data.data);
-      setTodayCount(res.data.meta.total);
+      dispatch({ type: "init", records: res.data.data, total: res.data.meta.total });
     });
     listCameras().then((res) => setCameras(res.data.data));
   }, []);
 
-  const latestPlateRef = useRef(latestPlate);
-  if (latestPlate && latestPlate !== latestPlateRef.current) {
-    latestPlateRef.current = latestPlate;
-    setRecords((prev) => [latestPlate, ...prev].slice(0, 10));
-    setTodayCount((prev) => prev + 1);
-  }
+  useEffect(() => {
+    if (latestPlate) {
+      dispatch({ type: "new_plate", plate: latestPlate });
+    }
+  }, [latestPlate]);
 
   const onlineCameras = cameras.filter((c) => c.is_active).length;
   const avgConfidence = records.length > 0
