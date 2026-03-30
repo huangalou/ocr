@@ -15,7 +15,7 @@ logger = logging.getLogger("video-worker")
 REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
 QUEUE_KEY = "queue:video_jobs"
-FRAMES_QUEUE_KEY = "queue:frames"
+FRAMES_QUEUE_KEY = "queue:video_frames"
 
 PROGRESS_UPDATE_INTERVAL = 5
 
@@ -84,6 +84,14 @@ def main():
             update_progress(job_id, extracted, extracted, plates_count)
             mark_completed(job_id, plates_count)
             logger.info(f"Video job {job_id} completed: {extracted} frames extracted")
+
+            # Send sentinel to plate-detector
+            sentinel = json.dumps({
+                "video_job_id": job_id,
+                "type": "end_of_frames",
+                "total_frames": extracted,
+            })
+            r.lpush(FRAMES_QUEUE_KEY, sentinel)
 
         except Exception as e:
             logger.exception(f"Video job {job_id} failed")
