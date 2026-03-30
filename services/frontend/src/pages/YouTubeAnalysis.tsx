@@ -22,10 +22,10 @@ export default function YouTubeAnalysis() {
     if (!messages.length) return;
     const latest = messages[messages.length - 1];
 
-    if (latest.type === "progress" && activeJob) {
+    if (latest.type === "progress") {
       setActiveJob((prev) => prev ? {
         ...prev,
-        status: latest.status || prev.status,
+        status: (latest.status || prev.status) as VideoJob["status"],
         progress: latest.progress ?? prev.progress,
         processed_frames: latest.processed_frames ?? prev.processed_frames,
         plates_found: latest.plates_found ?? prev.plates_found,

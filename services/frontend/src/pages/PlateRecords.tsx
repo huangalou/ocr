@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listPlates, exportPlates } from "../api/client";
 import type { PlateRecord } from "../api/client";
 
@@ -11,7 +11,7 @@ export default function PlateRecords() {
   const [endDate, setEndDate] = useState("");
   const pageSize = 20;
 
-  const fetchRecords = () => {
+  const fetchRecords = useCallback(() => {
     const params: Record<string, string | number> = { page, page_size: pageSize };
     if (search) params.plate_number = search;
     if (startDate) params.start_date = startDate;
@@ -20,9 +20,9 @@ export default function PlateRecords() {
       setRecords(res.data.data);
       setTotal(res.data.meta.total);
     });
-  };
+  }, [page, search, startDate, endDate]);
 
-  useEffect(() => { fetchRecords(); }, [page]);
+  useEffect(() => { fetchRecords(); }, [fetchRecords]);
 
   const handleSearch = () => { setPage(1); fetchRecords(); };
 

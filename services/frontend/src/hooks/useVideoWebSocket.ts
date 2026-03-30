@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface VideoProgressMessage {
   type: "progress" | "plate_found" | "completed" | "failed";
@@ -15,8 +15,9 @@ export interface VideoProgressMessage {
 export function useVideoWebSocket(jobId: string | null) {
   const [messages, setMessages] = useState<VideoProgressMessage[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
+  const connectRef = useRef<() => void>(() => {});
 
-  const connect = useCallback(() => {
+  connectRef.current = () => {
     if (!jobId) return;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(`${protocol}//${window.location.host}/api/v1/ws/videos/${jobId}`);
@@ -27,19 +28,19 @@ export function useVideoWebSocket(jobId: string | null) {
     };
 
     ws.onclose = () => {
-      setTimeout(connect, 3000);
+      setTimeout(() => connectRef.current(), 3000);
     };
 
     wsRef.current = ws;
-  }, [jobId]);
+  };
 
   useEffect(() => {
     if (jobId) {
       setMessages([]);
-      connect();
+      connectRef.current();
     }
     return () => wsRef.current?.close();
-  }, [jobId, connect]);
+  }, [jobId]);
 
   return messages;
 }

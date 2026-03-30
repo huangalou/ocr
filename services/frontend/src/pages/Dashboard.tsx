@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { listPlates, listCameras } from "../api/client";
 import type { PlateRecord, Camera } from "../api/client";
 import { usePlateWebSocket } from "../hooks/useWebSocket";
@@ -18,12 +18,12 @@ export default function Dashboard() {
     listCameras().then((res) => setCameras(res.data.data));
   }, []);
 
-  useEffect(() => {
-    if (latestPlate) {
-      setRecords((prev) => [latestPlate, ...prev].slice(0, 10));
-      setTodayCount((prev) => prev + 1);
-    }
-  }, [latestPlate]);
+  const latestPlateRef = useRef(latestPlate);
+  if (latestPlate && latestPlate !== latestPlateRef.current) {
+    latestPlateRef.current = latestPlate;
+    setRecords((prev) => [latestPlate, ...prev].slice(0, 10));
+    setTodayCount((prev) => prev + 1);
+  }
 
   const onlineCameras = cameras.filter((c) => c.is_active).length;
   const avgConfidence = records.length > 0
