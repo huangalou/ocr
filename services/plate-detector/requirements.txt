@@ -1,0 +1,6 @@
+ultralytics==8.3.60
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+redis==5.2.1
+boto3==1.36.4
+lap==0.5.12
