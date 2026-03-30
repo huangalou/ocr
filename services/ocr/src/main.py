@@ -1,13 +1,12 @@
 import json
 import logging
 import os
-import time
 
 import redis as redis_lib
 
-from .db import save_plate_record
+from .db import is_duplicate_plate, save_plate_record
 from .recognizer import recognize_plate
-from .storage import download_image, upload_image
+from .storage import download_image
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 logger = logging.getLogger("ocr-service")
@@ -36,6 +35,8 @@ def main():
         image_path = message["image_path"]
         source = message.get("source", "camera")
         camera_id = message.get("camera_id")
+        video_job_id = message.get("video_job_id")
+        frame_timestamp = message.get("frame_timestamp")
 
         logger.info(f"Processing job {job_id}: {image_path}")
 
@@ -52,6 +53,10 @@ def main():
             continue
 
         for plate in plates:
+            if is_duplicate_plate(video_job_id, plate["plate_number"]):
+                logger.info(f"Skipping duplicate plate {plate['plate_number']} for video job {video_job_id}")
+                continue
+
             record = save_plate_record(
                 plate_number=plate["plate_number"],
                 confidence=plate["confidence"],
@@ -59,6 +64,8 @@ def main():
                 image_path=image_path,
                 plate_region=plate["plate_region"],
                 camera_id=camera_id,
+                video_job_id=video_job_id,
+                frame_timestamp=frame_timestamp,
             )
             logger.info(f"Saved plate: {plate['plate_number']} (conf={plate['confidence']})")
 
