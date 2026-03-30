@@ -21,7 +21,7 @@ def get_video_info(url: str) -> dict:
 def download_video(url: str, output_dir: str) -> str:
     output_path = os.path.join(output_dir, "video.%(ext)s")
     ydl_opts = {
-        "format": "best[height<=720]",
+        "format": "best[height<=720]/best",
         "outtmpl": output_path,
         "quiet": True,
         "no_warnings": True,
@@ -35,7 +35,7 @@ def download_video(url: str, output_dir: str) -> str:
 
 def get_stream_url(url: str) -> str:
     ydl_opts = {
-        "format": "best[height<=720]",
+        "format": "best[height<=720]/best",
         "quiet": True,
         "no_warnings": True,
     }
