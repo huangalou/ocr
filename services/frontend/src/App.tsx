@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import PlateRecords from "./pages/PlateRecords";
 import UploadPage from "./pages/UploadPage";
 import CameraManage from "./pages/CameraManage";
+import YouTubeAnalysis from "./pages/YouTubeAnalysis";
 
 const navStyle = {
   display: "flex",
@@ -24,12 +25,14 @@ export default function App() {
         <NavLink to="/" style={linkStyle}>Dashboard</NavLink>
         <NavLink to="/plates" style={linkStyle}>車牌記錄</NavLink>
         <NavLink to="/upload" style={linkStyle}>上傳辨識</NavLink>
+        <NavLink to="/youtube" style={linkStyle}>YouTube 分析</NavLink>
         <NavLink to="/cameras" style={linkStyle}>攝影機管理</NavLink>
       </nav>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/plates" element={<PlateRecords />} />
         <Route path="/upload" element={<UploadPage />} />
+        <Route path="/youtube" element={<YouTubeAnalysis />} />
         <Route path="/cameras" element={<CameraManage />} />
       </Routes>
     </BrowserRouter>
