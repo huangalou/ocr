@@ -56,10 +56,11 @@ Five microservices communicating via Redis queues, sharing PostgreSQL and MinIO:
 - **API Service** (`services/api/`) — FastAPI REST API for CRUD, queries, export. Subscribes to Redis pub/sub and pushes to WebSocket clients
 - **Frontend** (`services/frontend/`) — React + Vite + TypeScript SPA with 4 pages: Dashboard, PlateRecords, UploadPage, CameraManage
 - **Video Worker** (`services/video-worker/`) — Consumes video job queue, downloads YouTube videos via yt-dlp, extracts frames with OpenCV, pushes into existing queue:frames pipeline
+- **Plate Detector** (`services/plate-detector/`) — YOLOv8 license plate detection + cross-frame tracking + image preprocessing, selects best crop per plate and sends to OCR
 
 Data flow:
 - Camera → MinIO + Redis Queue → OCR → PostgreSQL → API → Frontend
-- YouTube URL → API → Redis video queue → Video Worker → yt-dlp + OpenCV → MinIO + Redis frames queue → OCR → PostgreSQL
+- YouTube URL → API → Redis video queue → Video Worker → MinIO + Redis video_frames queue → Plate Detector → YOLOv8 + crop + preprocess → MinIO + Redis plate_crops queue → OCR → PostgreSQL
 
 ## Key Files
 
