@@ -1,7 +1,6 @@
 import logging
 import math
 import os
-import uuid
 
 import cv2
 from boto3 import client as boto3_client
