@@ -17,6 +17,7 @@ MINIO_BUCKET = os.environ.get("MINIO_BUCKET", "ocr-images")
 CONFIDENCE_THRESHOLD = float(os.environ.get("OCR_CONFIDENCE_THRESHOLD", 0.6))
 
 QUEUE_KEY = "queue:frames"
+QUEUE_PLATE_CROPS = "queue:plate_crops"
 PUBSUB_CHANNEL = "channel:plate_recognized"
 
 
@@ -25,7 +26,7 @@ def main():
     logger.info("OCR service started, waiting for frames...")
 
     while True:
-        result = r.brpop(QUEUE_KEY, timeout=5)
+        result = r.brpop([QUEUE_KEY, QUEUE_PLATE_CROPS], timeout=5)
         if result is None:
             continue
 
