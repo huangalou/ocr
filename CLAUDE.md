@@ -49,14 +49,17 @@ cd services/frontend && npm run dev
 
 ## Architecture
 
-Four microservices communicating via Redis queues, sharing PostgreSQL and MinIO:
+Five microservices communicating via Redis queues, sharing PostgreSQL and MinIO:
 
 - **Camera Service** (`services/camera/`) — OpenCV captures frames from RTSP/USB cameras, uploads to MinIO, pushes job to Redis queue
 - **OCR Service** (`services/ocr/`) — Consumes Redis queue, downloads image from MinIO, runs PaddleOCR, validates Taiwan plate format, saves to PostgreSQL, publishes result to Redis pub/sub
 - **API Service** (`services/api/`) — FastAPI REST API for CRUD, queries, export. Subscribes to Redis pub/sub and pushes to WebSocket clients
 - **Frontend** (`services/frontend/`) — React + Vite + TypeScript SPA with 4 pages: Dashboard, PlateRecords, UploadPage, CameraManage
+- **Video Worker** (`services/video-worker/`) — Consumes video job queue, downloads YouTube videos via yt-dlp, extracts frames with OpenCV, pushes into existing queue:frames pipeline
 
-Data flow: Camera → MinIO + Redis Queue → OCR → PostgreSQL → API → Frontend
+Data flow:
+- Camera → MinIO + Redis Queue → OCR → PostgreSQL → API → Frontend
+- YouTube URL → API → Redis video queue → Video Worker → yt-dlp + OpenCV → MinIO + Redis frames queue → OCR → PostgreSQL
 
 ## Key Files
 
