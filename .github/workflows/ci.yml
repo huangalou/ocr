@@ -43,6 +43,9 @@ jobs:
       - name: Ruff check (Camera)
         run: ruff check services/camera/src/ --output-format=github
 
+      - name: Ruff check (Video Worker)
+        run: ruff check services/video-worker/src/ --output-format=github
+
   lint-frontend:
     name: Lint — Frontend
     runs-on: ubuntu-latest
@@ -182,3 +185,6 @@ jobs:
 
       - name: Build Frontend image
         run: docker build -f services/frontend/Dockerfile -t ocr-frontend:ci services/frontend/
+
+      - name: Build Video Worker image
+        run: docker build -f services/video-worker/Dockerfile -t ocr-video-worker:ci .
