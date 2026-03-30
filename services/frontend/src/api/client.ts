@@ -18,7 +18,7 @@ export interface PlateRecord {
   camera_id: string | null;
   plate_number: string;
   confidence: number;
-  source: "camera" | "upload";
+  source: "camera" | "upload" | "youtube";
   image_path: string;
   plate_region: { x: number; y: number; w: number; h: number } | null;
   recognized_at: string;
@@ -50,3 +50,29 @@ export const uploadImage = (file: File) => {
 };
 export const exportPlates = (format: "csv" | "json", params?: Record<string, string>) =>
   api.get(`/plates/export`, { params: { format, ...params }, responseType: format === "csv" ? "blob" : "json" });
+
+export interface VideoJob {
+  id: string;
+  youtube_url: string;
+  title: string | null;
+  duration_seconds: number | null;
+  status: "pending" | "downloading" | "processing" | "completed" | "failed";
+  progress: number;
+  total_frames: number;
+  processed_frames: number;
+  plates_found: number;
+  frame_interval_sec: number;
+  error_message: string | null;
+  created_at: string;
+  completed_at: string | null;
+  plates?: { plate_number: string; confidence: number; frame_timestamp: number }[];
+}
+
+export const createVideoJob = (data: { youtube_url: string; frame_interval_sec?: number }) =>
+  api.post<ApiResponse<VideoJob>>("/videos", data);
+export const listVideoJobs = (params?: Record<string, string | number>) =>
+  api.get<PaginatedResponse<VideoJob>>("/videos", { params });
+export const getVideoJob = (id: string) =>
+  api.get<ApiResponse<VideoJob>>(`/videos/${id}`);
+export const deleteVideoJob = (id: string) =>
+  api.delete<ApiResponse<{ deleted: string }>>(`/videos/${id}`);
